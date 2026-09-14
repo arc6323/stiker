@@ -21,7 +21,6 @@ from sticker_utils import prepare_static_sticker, sanitize_pack_name
 
 load_dotenv()
 logging.basicConfig(format="%(asctime)s | %(levelname)s | %(name)s | %(message)s", level=logging.INFO)
-# httpx logs full Telegram API URLs, which include the bot token. Never log them at INFO.
 logging.getLogger("httpx").setLevel(logging.WARNING)
 logging.getLogger("httpcore").setLevel(logging.WARNING)
 logger = logging.getLogger("stiker-bot")
@@ -404,5 +403,16 @@ def build_application():
 
 
 if __name__ == "__main__":
-    start_health_server()
-    build_application().run_polling(allowed_updates=Update.ALL_TYPES)
+    port = int(os.getenv("PORT", "10000"))
+    public_url = os.getenv("RENDER_EXTERNAL_URL", "https://stickerme-ai.onrender.com").rstrip("/")
+    webhook_path = "telegram"
+    webhook_url = f"{public_url}/{webhook_path}"
+    logger.info("Starting webhook on port %s at %s", port, webhook_url)
+    build_application().run_webhook(
+        listen="0.0.0.0",
+        port=port,
+        url_path=webhook_path,
+        webhook_url=webhook_url,
+        allowed_updates=Update.ALL_TYPES,
+        drop_pending_updates=True,
+    )
