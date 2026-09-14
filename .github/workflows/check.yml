@@ -41,4 +41,4 @@ jobs:
           BOT_TOKEN: "123456:TEST_TOKEN_FOR_IMPORT_ONLY"
         run: python -c "import bot; bot.build_application(); print('StickerMe AI import OK')"
       - name: Test persistent order state across restart
-        run: pytest -q tests/test_state_store.py
+        run: python -m pytest -q tests/test_state_store.py
