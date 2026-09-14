@@ -1,0 +1,42 @@
+name: Patch webhook queue handling
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/patch_webhook.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Patch bot.py
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('bot.py')
+          s = p.read_text(encoding='utf-8')
+          old = 'drop_pending_updates=True,'
+          new = 'drop_pending_updates=False,'
+          if old not in s:
+              print('Already patched or pattern not found')
+          else:
+              s = s.replace(old, new)
+              p.write_text(s, encoding='utf-8')
+              print('Patched drop_pending_updates=False')
+          PY
+      - name: Commit patch
+        run: |
+          if git diff --quiet; then
+            echo 'No changes to commit'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add bot.py
+          git commit -m 'Fix queued Telegram updates after Render cold start'
+          git push
