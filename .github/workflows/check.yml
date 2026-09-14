@@ -10,6 +10,22 @@ on:
 jobs:
   check:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: stickerme_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d stickerme_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/stickerme_test
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -17,10 +33,12 @@ jobs:
           python-version: "3.12"
           cache: pip
       - name: Install dependencies
-        run: pip install -r requirements.txt
+        run: pip install -r requirements.txt pytest
       - name: Compile all Python files
-        run: python -m py_compile bot.py ai_generator.py sticker_utils.py
+        run: python -m py_compile bot.py ai_generator.py sticker_utils.py state_store.py
       - name: Import smoke test
         env:
           BOT_TOKEN: "123456:TEST_TOKEN_FOR_IMPORT_ONLY"
         run: python -c "import bot; bot.build_application(); print('StickerMe AI import OK')"
+      - name: Test persistent order state across restart
+        run: pytest -q tests/test_state_store.py
