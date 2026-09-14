@@ -1,40 +1,55 @@
-# Stiker Bot
+# StickerMe Ai
 
-Telegram bot MVP for creating personal AI sticker packs.
+Telegram-бот для персональных AI-стикерпаков.
 
-## Current MVP
+## Готово
+- принимает 3–5 фото пользователя;
+- предлагает 6 стилей;
+- делает 2 AI-превью;
+- генерирует полный набор из 20 стикеров;
+- приводит изображения к PNG 512x512;
+- автоматически создаёт Telegram sticker set;
+- поддерживает Telegram Stars;
+- содержит бесплатный тестовый режим.
 
-- /start onboarding
-- collects 3–5 user photos
-- lets the user choose a visual style
-- prepares an order for a 20-sticker pack
-- Telegram Stars payment flow scaffold (XTR)
-- clear extension point for AI image generation and sticker-set creation
+## Переменные окружения
+Обязательные:
+- `BOT_TOKEN` — токен от BotFather;
+- `OPENAI_API_KEY` — OpenAI API key.
 
-## Environment
+Дополнительные:
+- `OPENAI_IMAGE_MODEL=gpt-image-1`
+- `OPENAI_VISION_MODEL=gpt-5-mini`
+- `PACK_PRICE_STARS=399`
+- `ENABLE_PAYMENTS=false`
+- `ALLOW_FREE_PACKS=true`
+- `AUTO_PUBLISH_STICKER_SET=true`
 
-Create these environment variables on your host:
+## Тестовый режим
+Пока продукт проверяется:
+```env
+ENABLE_PAYMENTS=false
+ALLOW_FREE_PACKS=true
+```
 
-- `BOT_TOKEN` — token from @BotFather
-- `PACK_PRICE_STARS` — optional, defaults to `399`
+## Продакшен с оплатой Stars
+После проверки генерации:
+```env
+ENABLE_PAYMENTS=true
+ALLOW_FREE_PACKS=false
+```
 
-## Local run
-
+## Запуск
 ```bash
-python -m venv .venv
-source .venv/bin/activate
 pip install -r requirements.txt
 python bot.py
 ```
 
-## Deployment
+## Docker
+```bash
+docker build -t stickerme-ai .
+docker run --env-file .env stickerme-ai
+```
 
-The bot uses long polling, so it can run on any always-on Python host or container.
-
-## Next milestones
-
-1. Connect image generation API.
-2. Normalize generated files to Telegram sticker requirements.
-3. Create sticker sets automatically after successful payment.
-4. Add SQLite/PostgreSQL persistence.
-5. Add referrals and analytics.
+## Безопасность
+`.env` и папка `data/` исключены из Git. Не публикуй `BOT_TOKEN` и `OPENAI_API_KEY` в коде.
