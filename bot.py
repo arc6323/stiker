@@ -414,5 +414,5 @@ if __name__ == "__main__":
         url_path=webhook_path,
         webhook_url=webhook_url,
         allowed_updates=Update.ALL_TYPES,
-        drop_pending_updates=True,
+        drop_pending_updates=False,
     )
